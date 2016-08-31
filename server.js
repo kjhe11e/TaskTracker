@@ -93,6 +93,20 @@ router.route('/tasks')
 	});
 
 
+// routes that end in /tasks/:task_id
+// -------------------------------------------------
+router.route('/tasks/:task_id')
+	// get task with corresponding id
+	// accessed at GET http://localhost:8080/api/tasks/:task_id
+	.get(function(req, res) {
+		Task.findById(req.params.task_id, function(err, task) {
+			if (err)
+				res.send(err);
+
+			res.json(task);
+		});
+	});
+
 
 // register routes ---------------------------------
 // all routes will be prefixed with /api
