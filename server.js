@@ -96,6 +96,7 @@ router.route('/tasks')
 // routes that end in /tasks/:task_id
 // -------------------------------------------------
 router.route('/tasks/:task_id')
+	
 	// get task with corresponding id
 	// accessed at GET http://localhost:8080/api/tasks/:task_id
 	.get(function(req, res) {
@@ -104,6 +105,26 @@ router.route('/tasks/:task_id')
 				res.send(err);
 
 			res.json(task);
+		});
+	})
+
+	// update task of this id
+	// accessed at PUT http://localhost:8080/api/tasks/:task_id
+	.put(function(req, res) {
+		// use the task model to find the task
+		Task.findById(req.params.task_id, function(err, task) {
+			if (err)
+				res.send(err);
+
+			task.name = req.body.name;	// update task info
+
+			// save the task
+			task.save(function(err) {
+				if (err)
+					res.send(err);
+
+				res.json({ message: 'Task updated' });
+			});
 		});
 	});
 
