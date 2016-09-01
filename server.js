@@ -68,7 +68,7 @@ router.get('/', function(req, res) {
 // routes that end in /tasks
 // -------------------------------------------------
 router.route('/tasks')
-	// create a task (accessed at POST http://localhost:8080/api/tasks)
+	// CREATE a task (accessed at POST http://localhost:8080/api/tasks)
 	.post(function(req, res) {
 		var task = new Task();	// create new instance of Task model
 		task.name = req.body.name;	// set task's name from request
@@ -82,13 +82,62 @@ router.route('/tasks')
 		});
 	})
 
-	// get all tasks (accessed at GET http://localhost:8080/api/tasks)
+	// GET all tasks (accessed at GET http://localhost:8080/api/tasks)
 	.get(function(req, res) {
 		Task.find(function(err, tasks) {
 			if (err)
 				res.send(err);
 
 			res.json(tasks);
+		});
+	});
+
+
+// routes that end in /tasks/:task_id
+// -------------------------------------------------
+router.route('/tasks/:task_id')
+	
+	// GET task with corresponding id
+	// accessed at GET http://localhost:8080/api/tasks/:task_id
+	.get(function(req, res) {
+		Task.findById(req.params.task_id, function(err, task) {
+			if (err)
+				res.send(err);
+
+			res.json(task);
+		});
+	})
+
+	// UPDATE task of this id
+	// accessed at PUT http://localhost:8080/api/tasks/:task_id
+	.put(function(req, res) {
+		// use the task model to find the task
+		Task.findById(req.params.task_id, function(err, task) {
+			if (err)
+				res.send(err);
+
+			task.name = req.body.name;	// update task info
+
+			// save the task
+			task.save(function(err) {
+				if (err)
+					res.send(err);
+
+				res.json({ message: 'Task updated' });
+			});
+		});
+	})
+
+	// DELETE task with this id
+	// accessed at DELETE http://localhost:8080/api/tasks/:task_id
+	.delete(function(req, res) {
+		Task.remove( {
+			_id: req.params.task_id
+		}, function(err, task) {
+			if (err)
+				res.send(err);
+
+			res.json({ message: 'Deleted task' });
 		});
 	});
 
