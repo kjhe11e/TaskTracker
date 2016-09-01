@@ -97,11 +97,7 @@ router.route('/tasks')
 // -------------------------------------------------
 router.route('/tasks/:task_id')
 	
-<<<<<<< HEAD
-	// get task with corresponding id
-=======
 	// GET task with corresponding id
->>>>>>> addRestApi
 	// accessed at GET http://localhost:8080/api/tasks/:task_id
 	.get(function(req, res) {
 		Task.findById(req.params.task_id, function(err, task) {
@@ -112,11 +108,7 @@ router.route('/tasks/:task_id')
 		});
 	})
 
-<<<<<<< HEAD
-	// update task of this id
-=======
 	// UPDATE task of this id
->>>>>>> addRestApi
 	// accessed at PUT http://localhost:8080/api/tasks/:task_id
 	.put(function(req, res) {
 		// use the task model to find the task
@@ -134,10 +126,6 @@ router.route('/tasks/:task_id')
 				res.json({ message: 'Task updated' });
 			});
 		});
-<<<<<<< HEAD
-	});
-
-=======
 	})
 
 	// DELETE task with this id
@@ -154,7 +142,6 @@ router.route('/tasks/:task_id')
 	});
 
 
->>>>>>> addRestApi
 
 // register routes ---------------------------------
 // all routes will be prefixed with /api
