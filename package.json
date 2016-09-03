@@ -1,10 +1,15 @@
 {
-	"name": "task-tracker",
-	"main": "server.js",
-	"dependencies": {
-		"express" : "~4.5.1",
-		"mongoose" : "~3.8.0",
-		"body-parser" : "~1.4.2",
-		"method-override" : "~2.0.2"
+	"name"						: "task-tracker",
+	"version"					: "0.0.0",
+	"description"				: "Simple task tracking application",
+	"main"						: "server.js",
+	"author"					: "Kyle Helle",
+	"dependencies"				:
+	{
+		"body-parser"			: "^1.4.3",
+		"express"				: "^4.13.4",
+		"method-override"		: "^2.1.3",
+		"mongoose"				: "^4.4.12",
+		"morgan"				: "^1.1.1"
 	}
 }

@@ -1,161 +1,98 @@
 // server.js
 
 
-// modules =========================================
-// =================================================
-var express			= require('express');
-var app				= express();
-var bodyParser		= require('body-parser');
-var methodOverride	= require('method-override');
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://kylehelle:seattle@ds019796.mlab.com:19796/kjhe11e_test_mongodb');
+// set up =============================================
+// ====================================================
+var express = require('express');
+var app = express();	// create app with express
+var mongoose = require('mongoose');		// mongoose for mongodb
+var morgan = require('morgan');		// log requests to the console (express4)
+var bodyParser = require('body-parser');	// pull info from HTML POST (express4)
+var methodOverride = require('method-override');	// simulate DELETE and PUT (express4)
 
 
-// configuration ===================================
-// =================================================
+// configuration ======================================
+// ====================================================
+mongoose.connect('mongodb://kylehelle:MarinersSeahawks@ds019796.mlab.com:19796/kjhe11e_test_mongodb');
 
-// config files
-var db = require('./config/db');
+app.use(express.static(__dirname + '/public'));		// set static files location /public/img will be /img
+app.use(morgan('dev'));								// log each request to console
+app.use(bodyParser.urlencoded({'extended': 'true'}));	// parse application/x-www-form-urlencoded
+app.use(bodyParser.json());		// parse application/json
+app.use(bodyParser.json({ type: 'application/vnd.api+json' }));		// parse application/vnd.api+json as json
+app.use(methodOverride());
 
-// set port to use
-var port = process.env.PORT || 8080;
-
-// connect to mongoDB database
-// (uncomment after entering credentials in config/db.js)
-// mongoose.connect(db.url);
-
-// get all data/stuff of body POST parameters
-// parse application/json
-app.use(bodyParser.json());
-
-// parse application/vnd.api+json as json
-app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
-
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// override with the X-HTTP-Method-Override header in the request. Simulate DELETE/PUT
-app.use(methodOverride('X-HTTP-Method-Override'));
-
-// set static files location /public/img will be /img for users
-app.use(express.static(__dirname + '/public'));
-
-
-// TaskSchema for MongoDB ==========================
-// =================================================
-var Task = require('./app/models/task');
-
-
-// routes for the API ==================================
-// =================================================
-var router = express.Router();	// get an instance of express router
-
-// middleware to use for all requests
-router.use(function(req, res, next) {
-	// log here
-	console.log('Request made');
-	next();	// go to the next routes and don't stop here
+// models =============================================
+// ====================================================
+var Task = mongoose.model('Task', {
+	text : String
 });
 
-// test route to make sure everything is working correctly,
-// accessed at GET http://localhost:8080/api
-router.get('/', function(req, res) {
-	res.json({ message: 'Welcome to the API' });
+// routes =============================================
+// ====================================================
+
+// api ------------------------------------------------
+// GET all tasks
+app.get('/api/tasks', function(req, res) {
+	// use mongoose to get all tasks in database
+	Task.find(function(err, tasks) {
+		// if error retrieving, send the error
+		// nothing after res.send(err) will execute
+		if (err)
+			res.send(err)
+
+		res.json(tasks);	// return all tasks in JSON format
+	});
 });
 
-// *** add more routers for API here
+// CREATE task and send back all tasks after creation
+app.post('/api/tasks', function(req, res) {
+	// create a task, info comes from AJAX request from Angular
+	Task.create({
+		text : req.body.text,
+		done : false
+	}, function(err, task) {
+		if (err)
+			res.send(err)
 
-// routes that end in /tasks
-// -------------------------------------------------
-router.route('/tasks')
-	// CREATE a task (accessed at POST http://localhost:8080/api/tasks)
-	.post(function(req, res) {
-		var task = new Task();	// create new instance of Task model
-		task.name = req.body.name;	// set task's name from request
-
-		// save the task and check for errors
-		task.save(function(err) {
-			if (err)
-				res.send(err);
-
-			res.json({ message: 'Task created' });
-		});
-	})
-
-	// GET all tasks (accessed at GET http://localhost:8080/api/tasks)
-	.get(function(req, res) {
+		// get and return all tasks after one is created
 		Task.find(function(err, tasks) {
 			if (err)
-				res.send(err);
+				res.send(err)
 
 			res.json(tasks);
 		});
 	});
+});
 
+// DELETE a task
+app.delete('/api/tasks/:task_id', function(req, res) {
+	Task.remove({
+		_id : req.params.task_id
+	}, function(err, task) {
+		if (err)
+			res.send(err);
 
-// routes that end in /tasks/:task_id
-// -------------------------------------------------
-router.route('/tasks/:task_id')
-	
-	// GET task with corresponding id
-	// accessed at GET http://localhost:8080/api/tasks/:task_id
-	.get(function(req, res) {
-		Task.findById(req.params.task_id, function(err, task) {
+		// get and return all tasks after one is deleted
+		Task.find(function(err, tasks) {
 			if (err)
-				res.send(err);
+				res.send(err)
 
-			res.json(task);
-		});
-	})
-
-	// UPDATE task of this id
-	// accessed at PUT http://localhost:8080/api/tasks/:task_id
-	.put(function(req, res) {
-		// use the task model to find the task
-		Task.findById(req.params.task_id, function(err, task) {
-			if (err)
-				res.send(err);
-
-			task.name = req.body.name;	// update task info
-
-			// save the task
-			task.save(function(err) {
-				if (err)
-					res.send(err);
-
-				res.json({ message: 'Task updated' });
-			});
-		});
-	})
-
-	// DELETE task with this id
-	// accessed at DELETE http://localhost:8080/api/tasks/:task_id
-	.delete(function(req, res) {
-		Task.remove( {
-			_id: req.params.task_id
-		}, function(err, task) {
-			if (err)
-				res.send(err);
-
-			res.json({ message: 'Deleted task' });
+			res.json(tasks);
 		});
 	});
+});
+
+// application ----------------------------------------
+app.get('*', function(req, res) {
+	// angular will handle page changes on front-end
+	res.sendfile('./public/index.html');	// lead the single view file
+});
 
 
+// listen on port, start app with 'node server.js' ====
+// ====================================================
+app.listen(8080);
+console.log("Listening on port 8080");
 
-// register routes ---------------------------------
-// all routes will be prefixed with /api
-app.use('/api', router);
 
-
-// start app =======================================
-// =================================================
-
-// startup app at http://localhost:8080
-app.listen(port);
-
-// shoutout to the user
-console.log('Data on port ' + port);
-
-// expose app
-exports = module.exports = app;
