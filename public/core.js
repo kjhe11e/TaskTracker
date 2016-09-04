@@ -1,6 +1,6 @@
 // public/core.js
 
-var taskList = angular.modoule('taskList', []);
+var taskList = angular.module('taskList', []);
 
 function mainController($scope, $http) {
 	$scope.formData = {};
