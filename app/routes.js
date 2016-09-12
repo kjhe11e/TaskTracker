@@ -8,7 +8,63 @@
 var Task = require('./models/task');
 
 // expose routes to app with module.exports
-module.exports = function(app) {
+module.exports = function(app, passport) {
+
+
+	// ================================================
+	// Home page (with login link) ====================
+	// ================================================
+	app.get('/', function(req, res) {
+		res.render('authBase.ejs');	// load the authBase.ejs file
+	});
+
+
+	// ================================================
+	// Login page =====================================
+	// ================================================	
+	app.get('/login', function(req, res) {
+		// render page and pass in any flash data if exists
+		res.render('login.ejs', { message: req.flash('loginMessage') });
+	});
+
+
+	// process login form
+	// app.post('/login', do passport verification here);
+
+
+	// ================================================
+	// Signup =========================================
+	// ================================================
+	app.get('/signup', function(req, res) {
+		// render page and pass in any flash data if exists
+		res.render('signup.ejs', { message: req.flash('signupMessage') });
+	});
+
+
+	// process signup form
+	// app.post('/signup', do passport stuff here);
+
+
+	// ================================================
+	// Profile section ================================
+	// ================================================
+	// - want this protected so you have to be logged in first
+	// - will use route middleware to verify this (via isLoggedIn function)
+	app.get('/profile', isLoggedIn, function(req, res) {
+		res.render('index.html', {
+			user : req.user	// get user out of session and pass to template
+		});
+	});
+
+
+	// ================================================
+	// Logout =========================================
+	// ================================================
+	app.get('/logout', function(req, res) {
+		req.logout();
+		res.redirect('/');
+	});
+
 
 	// api ------------------------------------------------
 	// GET all tasks
@@ -65,9 +121,20 @@ module.exports = function(app) {
 	// application ----------------------------------------
 	app.get('*', function(req, res) {
 		// angular will handle page changes on front-end
-		res.sendfile('./public/index.html');	// lead the single view file
+		res.sendfile('./views/index.html');	// lead the single view file
 	});
 
+};
 
+
+// route middleware to make sure user is logged in
+function isLoggedIn(req, res, next) {
+	
+	// if user is authenticated in session, carry on
+	if(req.isAuthenticated())
+		return next();
+	
+	// if they aren't authenticated, then redirect to home (authBase) page
+	res.redirect('/');
 }
 
