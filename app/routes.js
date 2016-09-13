@@ -29,7 +29,11 @@ module.exports = function(app, passport) {
 
 
 	// process login form
-	// app.post('/login', do passport verification here);
+	app.post('/login', passport.authenticate('local-login', {
+		successRedirect : '/index',	// redirect to secure profile section
+		failureRedirect : '/login', // redirect back to signup page if there is an error 
+		failureFlash	: true	// allow flash messages
+	}));
 
 
 	// ================================================

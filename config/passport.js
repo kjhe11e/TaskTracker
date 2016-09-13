@@ -71,4 +71,36 @@ module.exports = function(passport) {
 	}));
 
 
+	// ================================================
+	// local login -----------------------------------
+	// ================================================
+	passport.use('local-login', new LocalStrategy ({
+		// by default, local strategy uses username and password
+		// overriding this to ouse email for username
+		usernameField	: 'email',
+		passwordField	: 'password',
+		passReqToCallback	: true	// allows passing back entire request to callback
+	},
+	function(req, email, password, done) { 	// callback with email and password from form
+		// find user with email = forms email
+		// check to see if user is already logged in
+		User.findOne({ 'local.email' : email }, function(err, user) {
+			// if any errors, return them
+			if (err)
+				return done(err);
+
+			// if no user found, return message
+			if (!user)
+				return done(null, false, req.flash('loginMessage', 'No user found.')); // req.falsh is way to set flashdata using connect-flash
+		
+			// if user is found but incorrect password
+			if (!user.validPassword(password))
+				return done(null, false, req.flash('loginMessage', 'Wrong password.'));	// create loginMessage and save it to session as flashdata
+			
+			// else, return authenticated user
+			return done(null, user);
+
+		});
+	}));
+
 };
