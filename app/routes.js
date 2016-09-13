@@ -43,7 +43,7 @@ module.exports = function(app, passport) {
 
 	// process signup form
 	app.post('/signup', passport.authenticate('local-signup', {
-		successRedirect		: '/profile',	// redirect to secure profile section
+		successRedirect		: '/index',	// redirect to authenticated homepage
 		failureRedirect		: '/signup',	// redirect back to signup page in case of error
 		failureFlash		: true			// allow flash messages
 	}));
