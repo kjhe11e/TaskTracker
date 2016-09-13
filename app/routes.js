@@ -42,7 +42,11 @@ module.exports = function(app, passport) {
 
 
 	// process signup form
-	// app.post('/signup', do passport stuff here);
+	app.post('/signup', passport.authenticate('local-signup', {
+		successRedirect		: '/profile',	// redirect to secure profile section
+		failureRedirect		: '/signup',	// redirect back to signup page in case of error
+		failureFlash		: true			// allow flash messages
+	}));
 
 
 	// ================================================

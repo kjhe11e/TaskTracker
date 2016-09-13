@@ -20,6 +20,8 @@ var port = process.env.PORT || 8080;	// set the port
 // ====================================================
 mongoose.connect(database.url);
 
+require('./config/passport')(passport);	// pass passport for configuration
+
 app.use(express.static(__dirname + '/public'));		// set static files location /public/img will be /img
 app.use(morgan('dev'));								// log each request to console
 app.use(bodyParser.urlencoded({'extended': 'true'}));	// parse application/x-www-form-urlencoded
