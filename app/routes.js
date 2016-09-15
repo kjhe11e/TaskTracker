@@ -30,7 +30,7 @@ module.exports = function(app, passport) {
 
 	// process login form
 	app.post('/login', passport.authenticate('local-login', {
-		successRedirect : '/index',	// redirect to secure profile section
+		successRedirect : '/tasksHome',	// redirect to secure homepage section
 		failureRedirect : '/login', // redirect back to signup page if there is an error 
 		failureFlash	: true	// allow flash messages
 	}));
@@ -47,19 +47,32 @@ module.exports = function(app, passport) {
 
 	// process signup form
 	app.post('/signup', passport.authenticate('local-signup', {
-		successRedirect		: '/index',	// redirect to authenticated homepage
+		successRedirect		: '/tasksHome',	// redirect to authenticated homepage
 		failureRedirect		: '/signup',	// redirect back to signup page in case of error
 		failureFlash		: true			// allow flash messages
 	}));
 
 
 	// ================================================
-	// Profile section ================================
+	// google auth routes =============================
+	// ================================================
+	app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+	
+	// callback after google has authenticated user
+	app.get('/auth/google/callback',
+		passport.authenticate('google', {
+			successRedirect : '/tasksHome',
+			failureRedirect : '/'
+		}));
+
+
+	// ================================================
+	// Tasklist section ================================
 	// ================================================
 	// - want this protected so you have to be logged in first
 	// - will use route middleware to verify this (via isLoggedIn function)
-	app.get('/profile', isLoggedIn, function(req, res) {
-		res.render('index.html', {
+	app.get('/tasksHome', isLoggedIn, function(req, res) {
+		res.render('tasksHome.ejs', {
 			user : req.user	// get user out of session and pass to template
 		});
 	});
@@ -129,7 +142,7 @@ module.exports = function(app, passport) {
 	// application ----------------------------------------
 	app.get('*', function(req, res) {
 		// angular will handle page changes on front-end
-		res.sendfile('./views/index.html');	// lead the single view file
+		res.sendfile('./views/tasksHome.ejs');	// lead the single view file
 	});
 
 };
