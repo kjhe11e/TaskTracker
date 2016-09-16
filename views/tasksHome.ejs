@@ -1,26 +1,81 @@
 <!-- views/tasksHome.ejs -->
 
 <!doctype html>
-<html>
-<head>
-	<title>Welcome</title>
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
 
+<!-- assign Angular module -->
+
+<html ng-app="taskList">
+<head>
+	<!-- meta -->
+	<meta charset="utf-8">
+	<!-- optimize mobile viewport -->
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+
+	<title>TaskTracker</title>
+
+	<!-- scrolls -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"> <!-- load bootstrap -->
 	<style>
-		body		{ padding-top: 80x; }
+		html 			{ overflow-y:scroll; }
+		body 			{ padding-top: 50px; }
+		#task-list		{ margin-bottom: 30px; }
 	</style>
+
+	<!-- scrolls -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> <!-- load jquery -->
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script> <!-- load angular -->
+	<script src="js/controllers/main.js"></script>
+	<script src="js/services/tasks.js"></script>
+	<script src="js/core.js"></script>
+
 </head>
 
-<body>
+<!-- set controller, get all tasks -->
+<body ng-controller="mainController">
 	<div class="container">
 
-		<div class="col-sm-6 col-sm-offset-3">
-			<h1>Welcome to TaskTracker</h1>
-
+		<!-- header and task count -->
+		<div class="jumbotron text-center">
+			<h1>Welcome <span class="label label-info">{{ tasks.length }}</span></h1>
 		</div>
 
+		<!-- task list -->
+		<div id="task-list" class="row">
+			<div class="col-sm-4 col-sm-offset-4">
+		
+				<!-- loop over tasks in $scope.tasks -->
+				<div class="checkbox" ng-repeat="task in tasks">
+					<label>
+						<input type="checkbox" ng-click="deleteTask(task._id"> {{ task.text }}
+					</label>
+				</div>
+			</div>
+		</div>
+
+		<!-- form to create tasks -->
+		<div id="task-form" class="row">
+			<div class="col-sm-8 col-sm-offset-2 text-center">
+				<form>
+					<div class="form-group">
+
+						<!-- bind v alue to formData.text in angular -->
+						<input type="text" class="form-control input-lg text-center" placeholder="task description" ng-model="formData.text">
+					</div>
+
+					<!-- createTask() will create tasks -->
+					<button type="submit" class="btn btn-primary btn-lg" ng-click="createTask()">Add task</button>
+					<!-- <button type="submit" class="btn btn-primary btn-lg"
+					ng-click="deleteTask()">Delete task</button> -->
+
+				</form>
+			</div>
+		</div>
 	</div>
+
 </body>
 
 </html>
+
+
+
+
