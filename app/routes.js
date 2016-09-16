@@ -89,7 +89,7 @@ module.exports = function(app, passport) {
 
 	// api ------------------------------------------------
 	// GET all tasks
-	app.get('/api/tasks', function(req, res) {
+	app.get('/api/tasks', isLoggedIn, function(req, res) {
 		// use mongoose to get all tasks in database
 		Task.find(function(err, tasks) {
 			// if error retrieving, send the error
@@ -102,7 +102,7 @@ module.exports = function(app, passport) {
 	});
 
 	// CREATE task and send back all tasks after creation
-	app.post('/api/tasks', function(req, res) {
+	app.post('/api/tasks', isLoggedIn, function(req, res) {
 		// create a task, info comes from AJAX request from Angular
 		Task.create({
 			text : req.body.text,
@@ -122,7 +122,7 @@ module.exports = function(app, passport) {
 	});
 
 	// DELETE a task
-	app.delete('/api/tasks/:task_id', function(req, res) {
+	app.delete('/api/tasks/:task_id', isLoggedIn, function(req, res) {
 		Task.remove({
 			_id : req.params.task_id
 		}, function(err, task) {
