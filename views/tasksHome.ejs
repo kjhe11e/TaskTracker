@@ -46,7 +46,7 @@
 				<!-- loop over tasks in $scope.tasks -->
 				<div class="checkbox" ng-repeat="task in tasks">
 					<label>
-						<input type="checkbox" ng-click="deleteTask(task._id"> {{ task.text }}
+						<input type="checkbox" ng-click="deleteTask(task._id)"> {{ task.text }}
 					</label>
 				</div>
 			</div>
@@ -58,14 +58,12 @@
 				<form>
 					<div class="form-group">
 
-						<!-- bind v alue to formData.text in angular -->
+						<!-- bind value to formData.text in angular -->
 						<input type="text" class="form-control input-lg text-center" placeholder="task description" ng-model="formData.text">
 					</div>
 
 					<!-- createTask() will create tasks -->
 					<button type="submit" class="btn btn-primary btn-lg" ng-click="createTask()">Add task</button>
-					<!-- <button type="submit" class="btn btn-primary btn-lg"
-					ng-click="deleteTask()">Delete task</button> -->
 
 				</form>
 			</div>
