@@ -50,3 +50,6 @@ app.listen(port);
 console.log("Listening on port " + port);
 
 
+module.exports = app;	// for testing with mocha, need a better config for production
+
+
