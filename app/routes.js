@@ -67,6 +67,60 @@ module.exports = function(app, passport) {
 
 
 	// ================================================
+	// Authorization ==================================
+	// - already logged in / connect with social account
+	// ================================================
+
+	// local ------------------------------------------
+	app.get('/connect/local', function(req, res) {
+		res.render('connectLocal.ejs', { message: req.flash('loginMessage') });
+	});
+	app.post('/connect/local', passport.authenticate('local-signup', {
+		successRedirect : '/tasksHome', 	// redirect to secure profile section
+		failureRedirect : '/connect/local',	// redirect back to signup page
+		failureFlash	: true	// allow flash messages
+	}));
+
+	// google -----------------------------------------
+	// send to google to do authentication
+	app.get('/connect/google', passport.authorize('google', { scope : ['profile', 'email'] }));
+
+	// callback after google has authorized user
+	app.get('/connect/google/callback',
+		passport.authorize('google', {
+			successRedirect : '/tasksHome',
+			failureRedirect : '/'
+		}));
+
+
+	// ================================================
+	// Unlink accounts ================================
+	// - to unlink social accounts, just remove token
+	// - for local, remove email and password
+	// - user account stays active in case they want to reconnect in future
+	// ================================================
+
+	// local ------------------------------------------
+	app.get('/unlink/local', function(req, res) {
+		var user				= req.user;
+		user.local.email		= undefined;
+		user.local.password		= undefined;
+		user.save(function(err) {
+			res.redirect('/tasksHome');
+		});
+	});
+
+	// google -----------------------------------------
+	app.get('/unlink/google', function(req, res) {
+		var user 			= req.user;
+		user.google.token 	= undefined;
+		user.save(function(err) {
+			res.redirect('/tasksHome');
+		});
+	});
+
+
+	// ================================================
 	// Tasklist section ================================
 	// ================================================
 	// - want this protected so you have to be logged in first

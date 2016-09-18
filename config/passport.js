@@ -112,44 +112,88 @@ module.exports = function(passport) {
 	// auth using google
 	// ================================================
 	passport.use(new GoogleStrategy ({
-		clientID		: configAuth.googleAuth.clientID,
-		clientSecret	: configAuth.googleAuth.clientSecret,
-		callbackURL		: configAuth.googleAuth.callbackURL,
+
+		// pull in app ID and secret from auth.js file
+		clientID			: configAuth.googleAuth.clientID,
+		clientSecret		: configAuth.googleAuth.clientSecret,
+		callbackURL			: configAuth.googleAuth.callbackURL,
+		passReqToCallback 	: true // allow passing in req from route, can now see if user logged in or not
 	},
-	function(token, refreshToken, profile, done) {
+	// google sends back token and profile
+	function(req, token, refreshToken, profile, done) {
 
 		// should be asynchronous methods
 		// User.findOne won't return until "all" data returned from Google
 		process.nextTick(function() {
-			// attempt finding user via google ID
-			User.findOne({ 'google.id' : profile.id }, function(err, user) {
-				if (err)
-					return done(err);
+			//check if user already logged in
+			if (!req.user) {
+				// attempt finding user via google ID
+				User.findOne({ 'google.id' : profile.id }, function(err, user) {
+					if (err)
+						return done(err);
 
-				if(user) {
-					// if user found, log them in
+					if(user) {
+
+						// if user ID already exists but no token (user was linked previously)
+						// then add token and profile info
+						if(!user.google.token){
+							
+							user.google.token = token;
+							user.google.name  = profile.name.givenName + ' ' + profile.name.familyName;
+							user.google.email = profile.emails[0].value;
+							
+							user.save(function(err) {
+								if (err)
+									throw err;
+
+								return done(null, user);
+							});
+						}
+
+						// if user found, log them in
+						return done(null, user);
+
+					} else {
+
+						// if user not in database, create new user
+						var newUser	= new User();
+
+						// set account information
+						newUser.google.id 		= profile.id;
+						newUser.google.token 	= token;
+						newUser.google.name 	= profile.displayName;
+						newUser.google.email 	= profile.emails[0].value; // get first email
+
+						// save user
+						newUser.save(function(err) {
+							if (err)
+								throw err;
+							// if successful, return new user
+							return done(null, newUser);
+						});
+					}
+				});
+			} else {
+
+				// user already exists and is logged in
+				// will link the accounts
+				var user 	= req.user;	// pull user out of the session
+
+				// update current users google creds
+				user.google.id 		= profile.id;
+				user.google.token 	= token;
+				user.google.name 	= profile.name.givenName + ' ' + profile.name.familyName;
+				user.google.email 	= profile.emails[0].value;
+
+				// save user
+				user.save(function(err) {
+					if (err)
+						throw err;
+
 					return done(null, user);
-
-				} else {
-
-					// if user not in database, create new user
-					var newUser	= new User();
-
-					// set account information
-					newUser.google.id 		= profile.id;
-					newUser.google.token 	= token;
-					newUser.google.name 	= profile.displayName;
-					newUser.google.email 	= profile.emails[0].value; // get first email
-
-					// save user
-					newUser.save(function(err) {
-						if (err)
-							throw err;
-						return done(null, newUser);
-					});
-				}
-			});
-		});		
+				});
+			} 
+		});	
 	}));
 
 };
