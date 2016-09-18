@@ -6,10 +6,13 @@ Features:
 * RESTful Node API
 * Angular for frontend UI and access to API
 
-To use:
+To run:
 * Navigate to directory and run npm install (requires node)
 * From project directory, run 'node server.js'
 * Access at localhost:8080
+
+To test:
+* From terminal at base directory, run 'mocha'
 
 References:
 I learned many of these concepts from https://www.scotch.io/. Thank you Chris Sevilleja.
